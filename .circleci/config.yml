@@ -16,7 +16,7 @@ dependencies:
     - "./vendor"
 jobs:
   build:
-    working_directory: /go/src/discord-bot-go
+    working_directory: /go/src/ecr-reunion
     docker:
       - image: circleci/golang:1.12
     environment: *build_env_vars
@@ -25,11 +25,11 @@ jobs:
       - restore_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
           paths:
-            - /go/src/discord-bot-go/vendor
+            - /go/src/ecr-reunion/vendor
       - run:
           name: Install Dependencies
           command: |
-            if [ ! -d /go/src/discord-bot-go/vendor ]; then
+            if [ ! -d /go/src/ecr-reunion/vendor ]; then
                 curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
                 /go/bin/dep ensure
             fi
@@ -44,7 +44,7 @@ jobs:
             - /tmp/go/cache
       - run:
           name: Build Application
-          command: go build -a -installsuffix cgo -o ./dist/discordbot .
+          command: go build -a -installsuffix cgo -o ./dist/app .
       - run: ls -als dist
       - save_cache:
           key: build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_BUILD_NUM }}

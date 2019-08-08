@@ -6,4 +6,4 @@ RUN apk add --update ca-certificates # Certificates for SSL
 COPY dist/ ./dist/
 COPY templates/ ./templates/
 
-ENTRYPOINT /app/dist/discordbot
+ENTRYPOINT /app/dist/app
