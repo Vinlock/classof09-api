@@ -1,0 +1,96 @@
+---
+apiVersion: kubedb.com/v1alpha1
+kind: MongoDB
+metadata:
+  name: {{APP_NAME}}-mongo
+spec:
+  version: "4.1.7-v1"
+  replicas: 2
+  replicaSet:
+    name: rs0
+  podTemplate:
+    spec:
+      args:
+        - --transitionToAuth
+  storage:
+    storageClassName: "default"
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{APP_NAME}}-app
+  labels:
+    app: {{APP_NAME}}-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{APP_NAME}}-app
+  template:
+    metadata:
+      labels:
+        app: {{APP_NAME}}-app
+        commitHash: "{{CIRCLE_SHA1}}"
+        buildNumber: "{{CIRCLE_BUILD_NUM}}"
+    spec:
+      dnsConfig:
+        options:
+          - name: single-request
+      imagePullSecrets:
+        - name: registry.dak.dev
+      containers:
+        - name: server
+          image: {{DOCKER_REGISTRY_URL}}/{{DOCKER_IMAGE_NAME}}:{{CIRCLE_SHA1}}
+          imagePullPolicy: Always
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: AWS_REGION
+              value: "{{AWS_REGION}}"
+            - name: APP_MONGO_HOST
+              value: "mongodb://{{APP_NAME}}-mongo/?replicaSet=rs0"
+            - name: APP_MONGO_REPLICA_SET
+              value: "rs0"
+            - name: APP_MONGO_DATABASE
+              value: "ecr_reunion"
+          envFrom:
+            - configMapRef:
+                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-env"
+            - secretRef:
+                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{APP_NAME}}-service
+spec:
+  ports:
+    - port: 4000
+      name: web
+      targetPort: 4000
+  selector:
+    app: {{APP_NAME}}-app
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{APP_NAME}}-ingress
+  annotations:
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - {{APP_HOSTNAME}}
+  rules:
+    - host: {{APP_HOSTNAME}}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{APP_NAME}}-service
+              servicePort: 4000

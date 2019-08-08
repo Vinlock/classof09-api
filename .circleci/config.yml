@@ -1,0 +1,160 @@
+version: 2.1
+variables:
+  app_name: &app_name
+    classof09-api
+  aws_region: &aws_region
+    us-west-2
+  app_hostname: &app_hostname
+    api.classof09.org
+  build_env_vars: &build_env_vars
+    - GOOS: linux
+    - GOARCH: amd64
+    - GOCACHE: "/tmp/go/cache"
+    - CGO_ENABLED: 0
+dependencies:
+  cache_directories:
+    - "./vendor"
+jobs:
+  build:
+    working_directory: /go/src/discord-bot-go
+    docker:
+      - image: circleci/golang:1.12
+    environment: *build_env_vars
+    steps:
+      - checkout
+      - restore_cache:
+          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          paths:
+            - /go/src/discord-bot-go/vendor
+      - run:
+          name: Install Dependencies
+          command: |
+            if [ ! -d /go/src/discord-bot-go/vendor ]; then
+                curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+                /go/bin/dep ensure
+            fi
+      - save_cache:
+          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          paths:
+            - /go/src/discord-bot-go/vendor
+      - restore_cache:
+          keys:
+            - build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_PREVIOUS_BUILD_NUM }}
+          paths:
+            - /tmp/go/cache
+      - run:
+          name: Build Application
+          command: go build -a -installsuffix cgo -o ./dist/discordbot .
+      - run: ls -als dist
+      - save_cache:
+          key: build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
+          paths:
+            - /tmp/go/cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./dist/
+            - ./Dockerfile
+            - ./.circleci/
+            - ./.deployment/
+            - ./templates/
+  dockerization:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run: ls -als dist
+      - run:
+          name: Build Image
+          command: docker build -t $DOCKER_REGISTRY_URL/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1 .
+      - run:
+          name: Docker Login
+          command: echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY_URL -u $DOCKER_USERNAME --password-stdin
+      - run:
+          name: Push Image
+          command: docker push $DOCKER_REGISTRY_URL/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1
+      - run: sed -i "s|{{DOCKER_REGISTRY_URL}}|$DOCKER_REGISTRY_URL|" .deployment/deployment.yml
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./.circleci/
+            - ./.deployment/
+  secrets:
+    docker:
+      - image: node:latest
+    environment:
+      APP_NAME: *app_name
+    steps:
+      - attach_workspace:
+          at: .
+      - run: ls -als
+      - run:
+          name: Install Node Dependencies
+          command: cd .circleci && yarn
+      - run: ls -als
+      - run:
+          name: Get Secrets
+          command: node .circleci/get-secrets.js -s $APP_NAME/$CIRCLE_BRANCH -f .deployment/secret.yml
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./.deployment/
+  deploy:
+    docker:
+      - image: alpine
+    environment:
+      APP_NAME: *app_name
+      AWS_REGION: *aws_region
+      APP_HOSTNAME: *app_hostname
+    steps:
+      - run: apk add ca-certificates
+      - run: apk add curl
+      - attach_workspace:
+          at: .
+      - run: sed -i "s|{{APP_NAME}}|$APP_NAME|" .deployment/deployment.yml
+      - run: sed -i "s|{{AWS_REGION}}|$AWS_REGION|" .deployment/deployment.yml
+      - run: sed -i "s|{{DOCKER_IMAGE_NAME}}|$DOCKER_IMAGE_NAME|" .deployment/deployment.yml
+      - run: sed -i "s|{{CIRCLE_SHA1}}|$CIRCLE_SHA1|" .deployment/deployment.yml
+      - run: sed -i "s|{{CIRCLE_BUILD_NUM}}|$CIRCLE_BUILD_NUM|" .deployment/deployment.yml
+      - run: sed -i "s|{{CIRCLE_BRANCH}}|$CIRCLE_BRANCH|" .deployment/deployment.yml
+      - run: sed -i "s|{{APP_HOSTNAME}}|$APP_HOSTNAME|" .deployment/deployment.yml
+      - run: cat .deployment/deployment.yml
+      - run: curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+      - run: chmod +x ./kubectl
+      - run: mv ./kubectl /usr/local/bin/kubectl
+      - run: echo $KUBE_TOKEN > ./kube_token
+      - run: echo $KUBE_CA | base64 -d > ./kube_ca
+      - run: kubectl config set-cluster $KUBE_CLUSTER_NAME --server=$KUBE_CLUSTER_ADDRESS --certificate-authority="$(pwd)/kube_ca"
+      - run: kubectl config set-credentials circleci --token="$(cat ./kube_token)"
+      - run: kubectl config set-context k8s --cluster=$KUBE_CLUSTER_NAME --user=circleci
+      - run: kubectl config use-context k8s
+      - run: kubectl apply -f .deployment/secret.yml --namespace $KUBE_NAMESPACE --context k8s --insecure-skip-tls-verify=true
+      - run: kubectl create configmap $APP_NAME-$CIRCLE_BRANCH-env --from-env-file=.deployment/run.env --namespace $KUBE_NAMESPACE --context k8s --dry-run -o yaml --insecure-skip-tls-verify=true | kubectl apply --insecure-skip-tls-verify=true -f -
+      - run: kubectl apply -f .deployment/deployment.yml --namespace $KUBE_NAMESPACE --context k8s --insecure-skip-tls-verify=true
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - build
+      - dockerization:
+          context: registry.dak.dev
+          requires:
+            - build
+      - secrets:
+          context: aws.dak
+          requires:
+            - dockerization
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          context: k8s.theweb.team
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - secrets
