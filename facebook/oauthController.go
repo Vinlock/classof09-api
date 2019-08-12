@@ -23,7 +23,7 @@ func AuthController(router *gin.Engine) {
 		RedirectURL:  redirectUrl + "/auth/facebook/callback",
 		ClientID:     facebookClientID,
 		ClientSecret: facebookClientSecret,
-		Scopes:       []string{"email", "public_profile", "groups_access_member_info"},
+		Scopes:       []string{"email", "public_profile"},
 		Endpoint:     facebook.Endpoint,
 	}
 
