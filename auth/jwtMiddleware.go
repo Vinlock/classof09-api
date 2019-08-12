@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"ecr-reunion/db"
 	"ecr-reunion/models"
 	jwt "github.com/appleboy/gin-jwt"
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
@@ -96,7 +97,12 @@ func JWTMiddleware(r *gin.Engine) {
 
 	r.POST("/login", authMiddleware.LoginHandler)
 
-	r.GET("/oauth/callback", GinPassportFacebook.Middleware(), authMiddleware.LoginHandler)
+	r.GET(
+		"/oauth/callback",
+		db.ConnectMiddleware(),
+		GinPassportFacebook.Middleware(),
+		authMiddleware.LoginHandler,
+	)
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
