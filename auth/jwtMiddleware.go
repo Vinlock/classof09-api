@@ -23,17 +23,12 @@ func JWTMiddleware(r *gin.Engine) {
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour * 24,
 		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var facebookId string
-			if err := c.ShouldBind(&facebookId); err != nil {
-				return "", jwt.ErrMissingLoginValues
-			}
-
 			db := c.MustGet("database").(*mongo.Database)
 			users := db.Collection("users")
 
 			facebookUser, err := GinPassportFacebook.GetProfile(c)
 			if err != nil {
-				log.Fatal(err.Error())
+				return "", jwt.ErrFailedAuthentication
 			}
 
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
