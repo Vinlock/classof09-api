@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ecr-reunion/auth"
 	"ecr-reunion/db"
 	"ecr-reunion/facebook"
 	"fmt"
@@ -21,6 +22,9 @@ func main() {
 
 	// Add Facebook OAuth
 	facebook.AuthController(r)
+
+	// JWT Middleware
+	auth.JWTMiddleware(r)
 
 	err := endless.ListenAndServe(":"+appPort, r)
 	if err != nil {

@@ -36,3 +36,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/durango/gin-passport-facebook"
+
+[[constraint]]
+  name = "github.com/appleboy/gin-jwt"
+  version = "2.6.2"
