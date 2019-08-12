@@ -15,7 +15,7 @@ var facebookClientID = os.Getenv("APP_FACEBOOK_CLIENT_ID")
 var facebookClientSecret = os.Getenv("APP_FACEBOOK_CLIENT_SECRET")
 
 func AuthController(router *gin.Engine) {
-	redirectUrl := "http://api.classof09.org"
+	redirectUrl := "https://api.classof09.org"
 	if isDev {
 		redirectUrl = "http://localhost:" + appPort
 	}
