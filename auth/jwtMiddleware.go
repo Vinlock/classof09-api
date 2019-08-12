@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"ecr-reunion/db"
 	"ecr-reunion/models"
 	jwt "github.com/appleboy/gin-jwt"
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
@@ -29,7 +28,7 @@ func JWTMiddleware(r *gin.Engine) {
 				return "", jwt.ErrMissingLoginValues
 			}
 
-			db := c.MustGet("db").(*mongo.Database)
+			db := c.MustGet("database").(*mongo.Database)
 			users := db.Collection("users")
 
 			facebookUser, err := GinPassportFacebook.GetProfile(c)
@@ -99,7 +98,6 @@ func JWTMiddleware(r *gin.Engine) {
 
 	r.GET(
 		"/oauth/callback",
-		db.ConnectMiddleware(),
 		GinPassportFacebook.Middleware(),
 		authMiddleware.LoginHandler,
 	)
