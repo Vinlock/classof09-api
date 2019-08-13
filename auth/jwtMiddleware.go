@@ -18,6 +18,16 @@ import (
 
 var identityKey = "_id"
 
+func logout(c *gin.Context) {
+	cookieDomain := os.Getenv("APP_COOKIE_DOMAIN")
+	c.SetCookie("token", "", 0, "/", cookieDomain, true, false)
+	redirectTo := "https://classof09.org"
+	if os.Getenv("APP_DEV_MODE") == "true" {
+		redirectTo = "http://localhost:" + os.Getenv("APP_PORT")
+	}
+	c.Redirect(302, redirectTo)
+}
+
 func JWTMiddleware(r *gin.Engine) {
 	authMiddleware := getMiddleware()
 
@@ -30,6 +40,8 @@ func JWTMiddleware(r *gin.Engine) {
 		GinPassportFacebook.Middleware(),
 		authMiddleware.LoginHandler,
 	)
+
+	authGroup.GET("/logout", logout)
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
