@@ -171,7 +171,11 @@ func getMiddleware() *jwt.GinJWTMiddleware {
 			})
 		},
 		LoginResponse: func(c *gin.Context, code int, token string, expire time.Time) {
-			c.Redirect(302, "http://localhost:8000")
+			redirectUrl := "https://classof09.org"
+			if os.Getenv("APP_DEV_MODE") == "true" {
+				redirectUrl = "http://localhost:" + os.Getenv("APP_PORT")
+			}
+			c.Redirect(302, redirectUrl)
 		},
 		RefreshResponse: nil,
 		TokenLookup:     "header: Authorization",
