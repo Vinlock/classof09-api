@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"ecr-reunion/models"
+	"encoding/json"
 	jwt "github.com/appleboy/gin-jwt"
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"time"
 )
@@ -77,19 +80,36 @@ func JWTMiddleware(r *gin.Engine) {
 			})
 		}
 
-		responses := db.Collection("responses")
-		responseFilter := bson.M{
-			"form_response.hidden.id": id.Hex(),
-			"form_response.form_id":   "CWy6cX",
-		}
-		log.Print(responseFilter)
-		var response interface{}
-		err = responses.FindOne(ctx, responseFilter).Decode(response)
 		surveyDone := true
+		client := &http.Client{}
+		request, err := http.NewRequest("GET", "https://api.typeform.com/forms/CWy6cX/responses", nil)
 		if err != nil {
-			log.Print(err.Error())
 			surveyDone = false
+		} else {
+			q := request.URL.Query()
+			q.Add("query", id.Hex())
+			request.URL.RawQuery = q.Encode()
+			request.Header.Set("Authorization", "Bearer "+os.Getenv("APP_TYPEFORM_TOKEN"))
+			response, err := client.Do(request)
+			if err != nil {
+				surveyDone = false
+			} else {
+				jsonData, _ := ioutil.ReadAll(response.Body)
+				type dataInterface struct {
+					TotalItems int `json:"total_items"`
+				}
+				var data dataInterface
+				err := json.Unmarshal(jsonData, &data)
+				log.Print(data.TotalItems)
+				if err != nil {
+					surveyDone = false
+				}
+				if data.TotalItems > 0 {
+					surveyDone = true
+				}
+			}
 		}
+
 		c.JSON(200, gin.H{
 			"id":         user.ID,
 			"name":       user.Name,
