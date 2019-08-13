@@ -19,7 +19,6 @@ func ConnectMiddleware() func(*gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	defer client.Disconnect(ctx)
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		fmt.Printf("ping %s:%s ping error: %v\n", err)
