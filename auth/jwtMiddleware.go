@@ -66,7 +66,10 @@ func JWTMiddleware(r *gin.Engine) {
 		}
 
 		responses := db.Collection("responses")
-		responseFilter := bson.M{"form_response.hidden.id": id}
+		responseFilter := bson.M{
+			"form_response.hidden.id": id.Hex(),
+			"form_response.form_id":   "CWy6cX",
+		}
 		var response interface{}
 		err = responses.FindOne(ctx, responseFilter).Decode(response)
 		surveyDone := true
