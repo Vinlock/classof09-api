@@ -221,6 +221,18 @@ func getUser(c *gin.Context) {
 		}
 	}
 
+	if !surveyDone {
+		c.SetCookie(
+			"typeform_done",
+			"",
+			0,
+			"/",
+			os.Getenv("APP_COOKIE_DOMAIN"),
+			os.Getenv("APP_DEV_MODE") != "true",
+			false,
+		)
+	}
+
 	c.JSON(200, gin.H{
 		"id":         user.ID,
 		"name":       user.Name,
