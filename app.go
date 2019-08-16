@@ -2,8 +2,8 @@ package main
 
 import (
 	"ecr-reunion/auth"
+	"ecr-reunion/controllers"
 	"ecr-reunion/db"
-	"ecr-reunion/typeform"
 	"fmt"
 	"github.com/fvbock/endless"
 	"github.com/gin-contrib/cors"
@@ -31,7 +31,7 @@ func main() {
 	r.Use(db.ConnectMiddleware())
 
 	// Typeform Controller
-	typeform.TypeformController(r)
+	controllers.TypeformController(r)
 
 	// JWT Middleware
 	auth.JWTMiddleware(r)
