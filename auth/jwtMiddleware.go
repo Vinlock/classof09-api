@@ -180,10 +180,12 @@ func getUser(c *gin.Context) {
 	}
 
 	surveyDone := false
+	onlyCompletedEntries := true
 	typeformApi := typeform.NewTypeformApi(os.Getenv("APP_TYPEFORM_TOKEN"))
 	params := typeform.GetResponsesParams{
-		FormId: os.Getenv("APP_SURVEY1_ID"),
-		Query:  facebookId,
+		FormId:    os.Getenv("APP_SURVEY1_ID"),
+		Query:     facebookId,
+		Completed: &onlyCompletedEntries,
 	}
 	response, err := typeformApi.GetResponses(params)
 	if err != nil {
@@ -206,7 +208,6 @@ func getUser(c *gin.Context) {
 
 	// Get Total Entries
 	totalEntries := 0
-	onlyCompletedEntries := true
 	params = typeform.GetResponsesParams{
 		FormId:    "CWy6cX",
 		Completed: &onlyCompletedEntries,
