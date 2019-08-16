@@ -116,11 +116,7 @@ func identityHandler(c *gin.Context) interface{} {
 
 	claims := jwt.ExtractClaims(c)
 
-	claimId := claims[jwt.IdentityKey].(string)
-	facebookId, err := primitive.ObjectIDFromHex(claimId)
-	if err != nil {
-		return nil
-	}
+	facebookId := claims[jwt.IdentityKey].(string)
 
 	filter := bson.M{"facebookId": facebookId}
 	var user models.User
