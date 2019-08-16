@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"ecr-reunion/models"
-	"encoding/json"
+	"ecr-reunion/typeform"
 	jwt "github.com/appleboy/gin-jwt"
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
 	"github.com/gin-gonic/gin"
@@ -12,9 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"time"
 )
@@ -193,32 +191,16 @@ func getUser(c *gin.Context) {
 	}
 
 	surveyDone := false
-	client := &http.Client{}
-	request, err := http.NewRequest("GET", "https://api.typeform.com/forms/CWy6cX/responses", nil)
+	typeformApi := typeform.NewTypeformApi(os.Getenv("APP_TYPEFORM_TOKEN"))
+	params := typeform.GetResponsesParams{
+		FormId: "CWy6cX",
+		Query:  id.Hex(),
+	}
+	response, err := typeformApi.GetResponses(params)
 	if err != nil {
 		surveyDone = false
-	} else {
-		q := request.URL.Query()
-		q.Add("query", id.Hex())
-		request.URL.RawQuery = q.Encode()
-		request.Header.Set("Authorization", "Bearer "+os.Getenv("APP_TYPEFORM_TOKEN"))
-		response, err := client.Do(request)
-		if err != nil {
-			log.Print(err.Error())
-		} else {
-			jsonData, _ := ioutil.ReadAll(response.Body)
-			type dataInterface struct {
-				TotalItems int `json:"total_items"`
-			}
-			var data dataInterface
-			err := json.Unmarshal(jsonData, &data)
-			if err != nil {
-				log.Print(err.Error())
-			}
-			if data.TotalItems > 0 {
-				surveyDone = true
-			}
-		}
+	} else if response.TotalItems > 0 {
+		surveyDone = true
 	}
 
 	if !surveyDone {
