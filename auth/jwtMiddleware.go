@@ -135,8 +135,8 @@ func authorizator(data interface{}, c *gin.Context) bool {
 
 func unauthorized(c *gin.Context, code int, message string) {
 	c.JSON(code, gin.H{
-		"code":  code,
-		"error": message,
+		"code":    "UNAUTHORIZED",
+		"message": message,
 	})
 }
 
