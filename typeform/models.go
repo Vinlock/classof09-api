@@ -16,6 +16,9 @@ type GetResponsesAnswer struct {
 	Choices Choices                 `json:"choices"`
 	Date    string                  `json:"date"`
 	Choice  Choice                  `json:"choice"`
+	Url     string                  `json:"url"`
+	FileUrl string                  `json:"file_url"`
+	Payment Payment                 `json:"payment"`
 }
 
 type GetResponsesItemMetadata struct {

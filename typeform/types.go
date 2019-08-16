@@ -16,7 +16,7 @@ const (
 	OpinionScaleField   FieldType = "opinion_scale"
 	PictureChoiceField  FieldType = "picture_choice"
 	DateField           FieldType = "date"
-	MultipleChoiceField           = "multiple_choice"
+	MultipleChoiceField FieldType = "multiple_choice"
 )
 
 type AnswerType string
@@ -26,14 +26,26 @@ const (
 	BooleanAnswer AnswerType = "boolean"
 	EmailAnswer   AnswerType = "email"
 	NumberAnswer  AnswerType = "number"
+	UrlAnswer     AnswerType = "url"
+	FileUrlAnswer AnswerType = "file_url"
+	PaymentAnswer AnswerType = "payment"
+	ChoiceAnswer  AnswerType = "choice"
+	ChoicesAnswer AnswerType = "choices"
 )
 
 type Choices struct {
-	Labels []string
+	Labels []string `json:"labels"`
 }
 
 type Choice struct {
-	Label string
+	Label string `json:"label"`
+}
+
+type Payment struct {
+	Amount  string `json:"amount"`
+	Last4   string `json:"last4"`
+	Name    string `json:"name"`
+	Success bool   `json:"success"`
 }
 
 type Time struct {

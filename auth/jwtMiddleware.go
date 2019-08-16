@@ -103,7 +103,7 @@ func authenticator(c *gin.Context) (interface{}, error) {
 func payloadFunc(data interface{}) jwt.MapClaims {
 	if v, ok := data.(models.User); ok {
 		return jwt.MapClaims{
-			jwt.IdentityKey: v.ID,
+			jwt.IdentityKey: v.FacebookId,
 		}
 	}
 	return jwt.MapClaims{}
@@ -117,12 +117,12 @@ func identityHandler(c *gin.Context) interface{} {
 	claims := jwt.ExtractClaims(c)
 
 	claimId := claims[jwt.IdentityKey].(string)
-	id, err := primitive.ObjectIDFromHex(claimId)
+	facebookId, err := primitive.ObjectIDFromHex(claimId)
 	if err != nil {
 		return nil
 	}
 
-	filter := bson.M{"_id": id}
+	filter := bson.M{"facebookId": facebookId}
 	var user models.User
 	err = users.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
@@ -173,17 +173,11 @@ func getUser(c *gin.Context) {
 
 	claims := jwt.ExtractClaims(c)
 
-	claimId := claims[jwt.IdentityKey].(string)
-	id, err := primitive.ObjectIDFromHex(claimId)
-	if err != nil {
-		c.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-	}
+	facebookId := claims[jwt.IdentityKey].(string)
 
-	filter := bson.M{"_id": id}
+	filter := bson.M{"facebookId": facebookId}
 	var user models.User
-	err = users.FindOne(ctx, filter).Decode(&user)
+	err := users.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
@@ -193,8 +187,8 @@ func getUser(c *gin.Context) {
 	surveyDone := false
 	typeformApi := typeform.NewTypeformApi(os.Getenv("APP_TYPEFORM_TOKEN"))
 	params := typeform.GetResponsesParams{
-		FormId: "CWy6cX",
-		Query:  id.Hex(),
+		FormId: os.Getenv("APP_SURVEY1_ID"),
+		Query:  facebookId,
 	}
 	response, err := typeformApi.GetResponses(params)
 	if err != nil {
@@ -215,9 +209,25 @@ func getUser(c *gin.Context) {
 		)
 	}
 
+	// Get Total Entries
+	totalEntries := 0
+	onlyCompletedEntries := true
+	params = typeform.GetResponsesParams{
+		FormId:    "CWy6cX",
+		Completed: &onlyCompletedEntries,
+	}
+	response, err = typeformApi.GetResponses(params)
+	if err != nil {
+		totalEntries = 0
+	} else {
+		totalEntries = response.TotalItems
+	}
+
 	c.JSON(200, gin.H{
-		"id":         user.ID,
-		"name":       user.Name,
-		"surveyDone": surveyDone,
+		"id":           user.ID,
+		"fbId":         user.FacebookId,
+		"name":         user.Name,
+		"surveyDone":   surveyDone,
+		"totalEntries": totalEntries,
 	})
 }
