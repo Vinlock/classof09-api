@@ -8,7 +8,6 @@ import (
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -120,7 +119,7 @@ func identityHandler(c *gin.Context) interface{} {
 
 	filter := bson.M{"facebookId": facebookId}
 	var user models.User
-	err = users.FindOne(ctx, filter).Decode(&user)
+	err := users.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil
 	}
