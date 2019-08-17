@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
+	"os"
 )
 
 func badRequest(c *gin.Context, errorCode string) {
@@ -52,7 +53,8 @@ func TypeformController(r *gin.Engine) {
 
 	typeformGroup.GET("/survey", func(c *gin.Context) {
 		fbId := c.Query("id")
-		location := "https://vinlock1.typeform.com/to/CWy6cX?name=" + antiUsers[fbId] + "&id=" + fbId
+		surveyId := os.Getenv("APP_SURVEY1_ID")
+		location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + antiUsers[fbId] + "&id=" + fbId
 		c.Redirect(302, location)
 	})
 }
