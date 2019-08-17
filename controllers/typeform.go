@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"ecr-reunion/typeform"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,9 +57,21 @@ func TypeformController(r *gin.Engine) {
 		fbId, ok := c.GetQuery("id")
 		name, nameOk := antiUsers[fbId]
 		if ok && nameOk {
-			surveyId := os.Getenv("APP_SURVEY1_ID")
-			location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + name + "&id=" + fbId
-			c.Redirect(302, location)
+			typeformApi := typeform.NewTypeformApi(os.Getenv("APP_TYPEFORM_TOKEN"))
+			completedOnly := true
+			params := typeform.GetResponsesParams{
+				FormId:    os.Getenv("APP_SURVEY1_ID"),
+				Completed: &completedOnly,
+				Query:     fbId,
+			}
+			response, err := typeformApi.GetResponses(params)
+			if err != nil || response.TotalItems > 0 {
+				valid = false
+			} else {
+				surveyId := os.Getenv("APP_SURVEY1_ID")
+				location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + name + "&id=" + fbId
+				c.Redirect(302, location)
+			}
 		} else {
 			valid = false
 		}
