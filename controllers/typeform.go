@@ -52,12 +52,18 @@ func TypeformController(r *gin.Engine) {
 	}
 
 	typeformGroup.GET("/survey", func(c *gin.Context) {
+		valid := true
 		fbId, ok := c.GetQuery("id")
-		if ok {
+		name, nameOk := antiUsers[fbId]
+		if ok && nameOk {
 			surveyId := os.Getenv("APP_SURVEY1_ID")
-			location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + antiUsers[fbId] + "&id=" + fbId
+			location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + name + "&id=" + fbId
 			c.Redirect(302, location)
 		} else {
+			valid = false
+		}
+
+		if !valid {
 			c.Redirect(302, "https://classof09.org")
 		}
 	})
