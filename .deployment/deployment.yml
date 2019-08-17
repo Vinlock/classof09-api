@@ -27,7 +27,7 @@ metadata:
   labels:
     app: {{APP_NAME}}-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: {{APP_NAME}}-app
