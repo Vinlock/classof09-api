@@ -45,4 +45,14 @@ func TypeformController(r *gin.Engine) {
 
 		c.JSON(200, gin.H{})
 	})
+
+	antiUsers := map[string]string{
+		"10213783272831334": "Danielle Felker",
+	}
+
+	typeformGroup.GET("/survey", func(c *gin.Context) {
+		fbId := c.Query("id")
+		location := "https://vinlock1.typeform.com/to/CWy6cX?name=" + antiUsers[fbId] + "&id=" + fbId
+		c.Redirect(302, location)
+	})
 }
