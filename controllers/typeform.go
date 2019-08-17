@@ -52,9 +52,13 @@ func TypeformController(r *gin.Engine) {
 	}
 
 	typeformGroup.GET("/survey", func(c *gin.Context) {
-		fbId := c.Query("id")
-		surveyId := os.Getenv("APP_SURVEY1_ID")
-		location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + antiUsers[fbId] + "&id=" + fbId
-		c.Redirect(302, location)
+		fbId, ok := c.GetQuery("id")
+		if ok {
+			surveyId := os.Getenv("APP_SURVEY1_ID")
+			location := "https://vinlock1.typeform.com/to/" + surveyId + "?name=" + antiUsers[fbId] + "&id=" + fbId
+			c.Redirect(302, location)
+		} else {
+			c.Redirect(302, "https://classof09.org")
+		}
 	})
 }
