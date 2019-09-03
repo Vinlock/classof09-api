@@ -50,6 +50,8 @@ func TypeformController(r *gin.Engine) {
 
 	antiUsers := map[string]string{
 		"10213783272831334": "Danielle Felker",
+		"Y3J5c3RhbC5hdHRhbGxhQGdtYWlsLmNvbQo=": "Crystal Attalla",
+		"Y2luZHl5X3JlbGxhMDlAeWFob28uY29tCg==": "Cindy Caballero",
 	}
 
 	typeformGroup.GET("/survey", func(c *gin.Context) {
