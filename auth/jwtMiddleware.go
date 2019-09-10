@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-var identityKey = "_id"
-
 func logout(c *gin.Context) {
 	cookieDomain := os.Getenv("APP_COOKIE_DOMAIN")
 	secureCookie := os.Getenv("APP_DEV_MODE") != "true"
