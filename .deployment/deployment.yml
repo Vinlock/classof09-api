@@ -37,7 +37,7 @@ spec:
             - configMapRef:
                 name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-env"
             - secretRef:
-                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}"
+                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-secrets"
 ---
 apiVersion: v1
 kind: Service

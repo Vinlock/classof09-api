@@ -7,6 +7,7 @@ const ora = require('ora');
 const args = minimist(process.argv.slice(2), {
     string: [
         'secret',
+        'metaname',
         'file',
         'region',
         'aws-key',
@@ -16,6 +17,7 @@ const args = minimist(process.argv.slice(2), {
         s: 'secret',
         f: 'file',
         r: 'region',
+        m: 'metaname',
     },
     default: {
         region: 'us-west-2',
@@ -26,6 +28,7 @@ const ymlFile = args['file'];
 const region = args['region'];
 const accessKeyId = args['aws-key'];
 const secretAccessKey = args['aws-secret'];
+const metaname = args['metaname'] || secret;
 
 // Validate
 if (!secret || secret.length === 0) {
@@ -66,12 +69,17 @@ secretsmanager.getSecretValue(params).promise()
         spinner.stop();
         // Log
         console.log('Secrets retrieved.');
+        const secretName = metaname
+            .replace('/', '-')
+            .replace('/', '-')
+            .concat('-secrets');
+        console.log('Building Secret:', secretName);
         const secrets = JSON.parse(SecretString);
         fs.writeFileSync(ymlFile, `---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: "${secret.replace('/', '-')}"
+  name: "${secretName}"
 type: Opaque
 data:
 ${Object.keys(secrets).map((s) => {
