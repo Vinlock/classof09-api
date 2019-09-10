@@ -34,8 +34,6 @@ spec:
             - name: APP_MONGO_DATABASE
               value: "ecr_reunion"
           envFrom:
-            - configMapRef:
-                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-env"
             - secretRef:
                 name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-secrets"
 ---
