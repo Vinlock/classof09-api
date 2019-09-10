@@ -131,7 +131,6 @@ jobs:
       - run: kubectl config set-context k8s --cluster=$KUBE_CLUSTER_NAME --user=circleci
       - run: kubectl config use-context k8s
       - run: kubectl apply -f .deployment/secret.yml --namespace $KUBE_NAMESPACE --context k8s --insecure-skip-tls-verify=true
-      - run: kubectl create configmap $APP_NAME-$CIRCLE_BRANCH-env --from-env-file=.deployment/run.env --namespace $KUBE_NAMESPACE --context k8s --dry-run -o yaml --insecure-skip-tls-verify=true | kubectl apply --insecure-skip-tls-verify=true -f -
       - run: kubectl apply -f .deployment/deployment.yml --namespace $KUBE_NAMESPACE --context k8s --insecure-skip-tls-verify=true
 workflows:
   version: 2
