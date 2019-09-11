@@ -31,8 +31,6 @@ spec:
               value: "production"
             - name: AWS_REGION
               value: "{{AWS_REGION}}"
-            - name: APP_MONGO_DATABASE
-              value: "ecr_reunion"
           envFrom:
             - secretRef:
                 name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-secrets"
