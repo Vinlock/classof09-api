@@ -4,6 +4,7 @@ import (
 	"context"
 	"ecr-reunion/models"
 	"ecr-reunion/typeform"
+	"fmt"
 	jwt "github.com/appleboy/gin-jwt"
 	GinPassportFacebook "github.com/durango/gin-passport-facebook"
 	"github.com/gin-gonic/gin"
@@ -91,6 +92,7 @@ func authenticator(c *gin.Context) (interface{}, error) {
 		}
 		_, err = users.InsertOne(ctx, user)
 		if err != nil {
+			fmt.Println(err.Error())
 			return nil, jwt.ErrFailedAuthentication
 		}
 	}
@@ -186,9 +188,7 @@ func getUser(c *gin.Context) {
 		Completed: &onlyCompletedEntries,
 	}
 	response, err := typeformApi.GetResponses(params)
-	if err != nil {
-		surveyDone = false
-	} else if response.TotalItems > 0 {
+	if err == nil && response.TotalItems > 0 {
 		surveyDone = true
 	}
 
