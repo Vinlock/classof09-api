@@ -14,8 +14,8 @@ spec:
     metadata:
       labels:
         app: {{APP_NAME}}-app
-        commitHash: "{{CIRCLE_SHA1}}"
-        buildNumber: "{{CIRCLE_BUILD_NUM}}"
+        commitHash: "{{COMMIT_SHA}}"
+        buildNumber: "{{BUILD_NUMBER}}"
     spec:
       dnsConfig:
         options:
@@ -24,16 +24,18 @@ spec:
         - name: registry.dak.dev
       containers:
         - name: server
-          image: {{DOCKER_REGISTRY_URL}}/{{DOCKER_IMAGE_NAME}}:{{CIRCLE_SHA1}}
+          image: {{DOCKER_REGISTRY_URL}}/{{DOCKER_IMAGE_NAME}}:{{COMMIT_SHA}}
           imagePullPolicy: Always
           env:
             - name: NODE_ENV
               value: "production"
             - name: AWS_REGION
               value: "{{AWS_REGION}}"
+            - name: APP_COMMIT_SHA
+              value: "{{COMMIT_SHA}}"
           envFrom:
             - secretRef:
-                name: "{{APP_NAME}}-{{CIRCLE_BRANCH}}-secrets"
+                name: "{{APP_NAME}}-{{VCS_BRANCH}}-secrets"
 ---
 apiVersion: v1
 kind: Service

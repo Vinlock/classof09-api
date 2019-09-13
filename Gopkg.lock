@@ -10,6 +10,29 @@
   version = "v2.6.2"
 
 [[projects]]
+  digest = "1:d36234224104285f2d55387a366dc43a952019ee5e4d74478cc5b2a2212d44dd"
+  name = "github.com/bugsnag/bugsnag-go"
+  packages = [
+    ".",
+    "device",
+    "errors",
+    "gin",
+    "headers",
+    "sessions",
+  ]
+  pruneopts = "UT"
+  revision = "3b0dbb79d7cc36c982e6ba70ceb76771552434f6"
+  version = "v1.5.3"
+
+[[projects]]
+  digest = "1:3049c43c6d1cfaa347acd27d6342187f8f38d9f416bbba7b02b43f82848302d2"
+  name = "github.com/bugsnag/panicwrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4009b2b7c78d820cc4a2e42f035bb557ce4ae45b"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
@@ -71,6 +94,14 @@
   version = "v1.8.0"
 
 [[projects]]
+  digest = "1:bed9d72d596f94e65fff37f4d6c01398074a6bb1c3f3ceff963516bd01db6ff5"
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:573ca21d3669500ff845bdebee890eb7fc7f0f50c59f2132f2a0c6b03d85086a"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -93,6 +124,14 @@
   pruneopts = "UT"
   revision = "27518f6661eba504be5a7a9a9f6d9460d892ade3"
   version = "v1.1.7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f433da6fbabb0bd1bd730fd340782015c644123d02eb78c20c69ce03352daad1"
+  name = "github.com/kardianos/osext"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384"
 
 [[projects]]
   digest = "1:9b90c7639a41697f3d4ad12d7d67dfacc9a7a4a6e0bbfae4fc72d0da57c28871"
@@ -280,6 +319,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/appleboy/gin-jwt",
+    "github.com/bugsnag/bugsnag-go/gin",
     "github.com/durango/gin-passport-facebook",
     "github.com/fvbock/endless",
     "github.com/gin-contrib/cors",

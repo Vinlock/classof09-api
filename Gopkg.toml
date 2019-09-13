@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/appleboy/gin-jwt"
   version = "2.6.2"
+
+[[constraint]]
+  name = "github.com/bugsnag/bugsnag-go"
+  version = "1.5.3"
