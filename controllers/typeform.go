@@ -53,6 +53,7 @@ func TypeformController(r *gin.Engine) {
 		"Y3J5c3RhbC5hdHRhbGxhQGdtYWlsLmNvbQo=": "Crystal Attalla",
 		"Y2luZHl5X3JlbGxhMDlAeWFob28uY29tCg==": "Cindy Caballero",
 		"bWF0dGhld2FkYW1zbGFAeWFob28uY29tCg==": "Matt Adams",
+		"Y3NnYWxkamllQGdtYWlsLmNvbQ==":         "Nicole Galdjie",
 	}
 
 	typeformGroup.GET("/survey", func(c *gin.Context) {
