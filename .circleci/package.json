@@ -5,7 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.500.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "ora": "^3.4.0"
   }
 }
