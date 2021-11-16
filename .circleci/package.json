@@ -4,7 +4,7 @@
   "main": "get-secrets.js",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.500.0",
+    "aws-sdk": "^2.814.0",
     "minimist": "^1.2.0",
     "ora": "^3.4.0"
   }
